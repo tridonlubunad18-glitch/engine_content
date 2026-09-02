@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "demo:brain": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-brain.ts"
+    "demo:brain": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-brain.ts",
+    "demo:assets": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-assets.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1124.0",

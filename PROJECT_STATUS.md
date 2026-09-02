@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 1 — Cerveau
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (démo DeepSeek réelle bout-en-bout)
-**Prochaine phase :** PHASE 2 — Assets (Asset Library, catégorisation, recherche, détection d'assets manquants)
+**Phase courante :** PHASE 2 — Assets
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (démo réelle sur 58 assets)
+**Prochaine phase :** PHASE 3 — Voix (ElevenLabs + Voice Engine + stockage R2)
 
 ---
 
@@ -78,26 +78,52 @@
 
 ---
 
+## ✅ Checklist PHASE 2 — Assets (PRD §37)
+
+- [x] **Asset Library** — `src/engines/asset-engine` : scan local `assets/` (PRD §8) → index déterministe
+- [x] **catégorisation** — 7 catégories PRD §8, extensions validées par catégorie, mots-clés extraits des noms
+- [x] **recherche** — `search()` : mots-clés + synonymes de catégorie, score & tri (PRD §3.6, aucune IA)
+- [x] **détection d'assets manquants** — `detectMissing()` : demandes (ex. visualHint) → candidats ou ⚠️ ASSET MANQUANT
+- [x] **notification WhatsApp** — différée en Phase 8 (décision utilisateur) : manque journalisé (warn) + statut BLOCKED
+- [x] **Assets réels fournis par l'utilisateur** — 58 fichiers (~615 Mo) dans `assets/` (privé, ignoré par git)
+- [x] **Outil de test** — `scripts/demo-assets.ts` + `npm run demo:assets`
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:assets` — scan | ✅ 58 assets (goal-ia 6, screenshots 3, app-videos 8, broll 19, music 7, logos 1, templates 14) |
+| Recherche « roulette » | ✅ `app-videos/roulette.mp4` + `templates/roulette.mp4` |
+| Recherche « captures d'écran » | ✅ 3 résultats dans `screenshots/` |
+| Recherche « b-roll illustration » | ✅ catégorie `broll` (limite : noms Pixabay non descriptifs → sélection catégorielle, contenu à vérifier) |
+| Détection de manque | ✅ « logo ×2, 1 disponible » → ⚠️ ASSET MANQUANT journalisé (statut BLOCKED, PRD §9) |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+
+---
+
+## 🧭 État du code
+
 ```text
 root/
   PRD.md                 → feuille de route (source de vérité)
   PROJECT_STATUS.md      → ce fichier
   README.md              → guide du projet
   .env.example           → variables requises (jamais de secrets réels)
-  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain
+  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain, demo:assets
   scripts/demo-brain.ts  → démo Phase 1 (chaîne stratégie → script, DeepSeek réel)
+  scripts/demo-assets.ts → démo Phase 2 (scan + recherche + détection de manques, assets réels)
   src/
     app/                 → layout + page minimale (Phase 0)
-    engines/             → strategy/angle/hook/script implémentés (Phase 1) ;
-                           10 autres moteurs en squelettes annotés
+    engines/             → strategy/angle/hook/script (Phase 1) + asset (Phase 2) implémentés ;
+                           9 autres moteurs en squelettes annotés
     providers/           → deepseek implémenté (Phase 1) ; supabase + cloudflare-r2
                            fonctionnels (Phase 0) ; elevenlabs/whatsapp/tiktok/facebook squelettes
     lib/                 → logger + ai (chatText/chatJson) + brand fonctionnels ;
                            database/storage/scheduler/metrics squelettes
 ```
 
-Rappel des phases restantes (PRD §37) : 2 Assets → 3 Voix → 4 Visual+Templates →
-5 Video → 6 Storage → 7 QC → 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
+Rappel des phases restantes (PRD §37) : 3 Voix → 4 Visual+Templates → 5 Video → 6 Storage →
+7 QC → 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
 
 ---
 
@@ -118,6 +144,9 @@ Rappel des phases restantes (PRD §37) : 2 Assets → 3 Voix → 4 Visual+Templa
 | Budget de mots calculé en code (150 mots/min) | PRD §3.6 : logique déterministe en code, jamais en IA |
 | Templates PRD §12 codés en dur (`TEMPLATE_ROLES`) | ordre des scènes déterministe ; l'IA remplit les narrations |
 | `tsx` en devDependencies + `scripts/demo-brain.ts` | test réel des engines TS hors Next (npm run demo:brain) |
+| Assets réels en local `assets/` (ignoré par git) | PRD §8 : l'utilisateur fournit les assets ; jamais commités ; migration cloud (R2/Supabase Storage) à la Phase 6 |
+| Asset Engine 100 % déterministe (scan, mots-clés, catégories) | PRD §3.6 : jamais d'IA pour recherche/tri ; limite documentée : B-roll Pixabay non descriptif → sélection catégorielle |
+| Notification d'asset manquant différée à la Phase 8 | décision utilisateur (option A1) : manque journalisé + statut BLOCKED en attendant WhatsApp |
 
 ---
 
@@ -140,32 +169,26 @@ Rappel des phases restantes (PRD §37) : 2 Assets → 3 Voix → 4 Visual+Templa
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 2 : Assets
+## 🚦 PROCHAINE SESSION — PHASE 3 : Voix
 
 Définition (PRD §37) :
-- [ ] Asset Library (bibliothèque locale d'assets)
-- [ ] catégorisation (goal-ia, screenshots, app-videos, broll, music, logos, templates — PRD §8)
-- [ ] recherche
-- [ ] détection d'assets manquants (PRD §9 : chercher → trouver → utiliser, sinon signaler)
-- [ ] notification WhatsApp
+- [ ] ElevenLabs (provider + clef)
+- [ ] Voice Engine
+- [ ] génération (texte de la Phase 1 → audio)
+- [ ] stockage R2
 
-**⚠️ Contradiction d'ordre à trancher au démarrage de la Phase 2 :**
-La « notification WhatsApp » de la Phase 2 dépend du provider WhatsApp, prévu en **Phase 8**.
-Options à valider avec l'utilisateur : (a) Phase 2 = bibliothèque + détection en local, statuts
-`BLOCKED`/`ASSET_MISSING` en base, notification WhatsApp reportée en Phase 8 ; (b) implémenter un
-envoi WhatsApp minimal anticipé.
-
-**Requis avant la Phase 2 :**
-1. Les assets réels de Goal-IA à fournir (vidéos, captures, logos, B-roll, musiques, templates —
-   PRD §8) ou décision d'utiliser un jeu d'assets de test local.
-2. Choix du stockage de la bibliothèque d'assets (local `assets/` vs Supabase Storage vs R2) —
-   PRD §8 montre une arborescence `/assets` ; R2 n'étant prévu qu'en Phase 6, l'arbitrage est à faire.
+**Requis avant de démarrer :**
+1. Clef API **ElevenLabs** (`ELEVENLABS_API_KEY` — actuellement vide dans `.env.local`) + modèle/voix à utiliser.
+2. Clés **Cloudflare R2** (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
+   — vides dans `.env.local`) : la Phase 3 prévoit le stockage R2 des voix off (PRD §37).
+   Alternative si R2 pas prêt : stockage local temporaire, upload en Phase 6 — à trancher avec l'utilisateur.
+3. Le Voice Engine consommera `voiceoverText` des scripts Phase 1 → chaîne de test : script → voix → fichier.
 
 ---
 
 ## 🗂️ Historique des sessions
 
-### Session 02/09/2026 — Phases 0 et 1
+### Session 02/09/2026 — Phases 0 → 2
 - **Phase 0 — Architecture** : scaffold Next.js 16 + TS, structure engines/providers/lib,
   connecteurs Supabase/R2, logger, `.env.example`, README, PROJECT_STATUS. Vérifiée (typecheck,
   lint, build, runtime HTTP 200). Commit `6af5744`.
@@ -175,4 +198,9 @@ envoi WhatsApp minimal anticipé.
   poussée.
 - **Phase 1 — Cerveau** : provider DeepSeek (timeout/retry/JSON/logs), Strategy/Angle/Hook/Script
   Engines + variantes, helpers `lib/ai`, contexte marque `lib/brand`, démo `npm run demo:brain`.
-  Vérifiée par démo DeepSeek réelle bout-en-bout. Commit (à créer).
+  Vérifiée par démo DeepSeek réelle bout-en-bout. Commit `7665cb0`.
+- **Socle assets (prep)** : dossier `assets/` créé (7 catégories PRD §8, README locaux), `/assets/`
+  ajouté au `.gitignore`. Commit `054076b`.
+- **Phase 2 — Assets** : Asset Engine 100 % déterministe — scan (58 assets réels), recherche
+  (mots-clés + catégories), détection d'assets manquants journalisée + statut BLOCKED (WhatsApp
+  différée à la Phase 8, décision utilisateur). Démo `npm run demo:assets` vérifiée.

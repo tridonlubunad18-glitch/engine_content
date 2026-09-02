@@ -50,6 +50,9 @@ npm run build
 
 # 5. Démo du cerveau (Phase 1) — nécessite DEEPSEEK_API_KEY dans .env.local
 npm run demo:brain
+
+# 6. Démo Asset Engine (Phase 2) — scan la bibliothèque locale assets/
+npm run demo:assets
 ```
 
 ## Structure des modules (PRD §4)
