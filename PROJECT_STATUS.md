@@ -388,4 +388,4 @@ clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
   Commit `9e7a326`.
 - **Phase 8 — WhatsApp (connecteur)** : décision utilisateur (whatsapp-web.js direct, 0 €),
   provider LocalAuth + QR + circuit fermé, scripts connect/qr-test. QR réel généré.
-  Commit : à noter après push. (Vérification téléphone en attente utilisateur.)
+  Commit `cc79f06`. (Vérification téléphone en attente utilisateur.)
