@@ -62,6 +62,9 @@ npm run demo:visual
 
 # 9. Démo Video (Phase 5) — montage MP4 réel (nécessite FFmpeg + une voix générée)
 npm run demo:video
+
+# 10. Démo Storage (Phase 6) — upload voix + vidéo sur Cloudflare R2 (nécessite les clés R2)
+npm run demo:storage
 ```
 
 ## Structure des modules (PRD §4)

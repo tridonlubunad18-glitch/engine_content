@@ -33,11 +33,12 @@ export function getR2Client(): S3Client {
   }
   const accountId = readEnv("R2_ACCOUNT_ID");
   const endpoint =
-    process.env.R2_ENDPOINT ??
+    process.env.R2_ENDPOINT?.trim() ||
     `https://${accountId}.r2.cloudflarestorage.com`;
   cachedClient = new S3Client({
     region: "auto",
     endpoint,
+    forcePathStyle: true,
     credentials: {
       accessKeyId: readEnv("R2_ACCESS_KEY_ID"),
       secretAccessKey: readEnv("R2_SECRET_ACCESS_KEY"),

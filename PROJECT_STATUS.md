@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 5 — Video
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (première vidéo MP4 réelle montée : 35 s, 1080×1920)
-**Prochaine phase :** PHASE 6 — Storage (upload R2 + métadonnées Supabase, versioning, previews)
+**Phase courante :** PHASE 6 — Storage
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (voix + vidéo uploadées sur Cloudflare R2)
+**Prochaine phase :** PHASE 7 — QC (contrôle automatique, score qualité, correction, validation)
 
 ---
 
@@ -174,6 +174,31 @@
 
 ---
 
+## ✅ Checklist PHASE 6 — Storage (PRD §37)
+
+- [x] **Clés R2** — fournies par l'utilisateur ; connexion vérifiée (bucket `marketing243`)
+- [x] **upload R2** — `src/lib/storage` : `uploadFile()` (PutObject, Content-Type, checksum SHA-256) ;
+      **voix + vidéo réelles uploadées et vérifiées côté R2 (HeadObject)**
+- [x] **métadonnées / file status / versioning** — manifest local `output/storage/manifest.json`
+      (statuts UPLOADED/FAILED, version par clé, checksum)
+- [x] **schéma Supabase prêt** — `supabase/init.sql` (tables `files` + `content`, PRD §29/§30) :
+      à exécuter par l'utilisateur dans le SQL Editor, puis branchement des écritures (suivi)
+- [ ] ~~previews~~ — différées (les vidéos servent déjà de prévisualisation ; previews dédiés à la Phase 7)
+- [x] **Outil de test** — `scripts/demo-storage.ts` + `npm run demo:storage`
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:storage` | ✅ upload réel : `content/2026/09/02/CONTENT-DEMO-001/voice.mp3` (v3) + `…/final.mp4` (v1, 5,3 Mo) |
+| Vérification R2 (HeadObject) | ✅ les 2 objets PRÉSENTS sur le bucket `marketing243` |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+
+> 📌 Suivi : après exécution de `supabase/init.sql`, les métadonnées pourront être écrites dans
+> Supabase (bascule depuis le manifest local) — prévu dès la prochaine session utilisateur.
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -188,17 +213,19 @@ root/
   scripts/demo-voice.ts  → démo Phase 3 (voix off réelle, rotation multi-comptes ElevenLabs)
   scripts/demo-visual.ts → démo Phase 4 (plan visuel : script + assets réels → plan de montage)
   scripts/demo-video.ts  → démo Phase 5 (montage MP4 réel : scènes + voix + musique)
+  scripts/demo-storage.ts → démo Phase 6 (upload voix + vidéo sur Cloudflare R2)
   src/
     app/                 → layout + page minimale (Phase 0)
     engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) +
                            template/visual (P4) + video (P5) implémentés ; 5 moteurs en squelettes
-    providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) implémentés ;
-                           supabase + cloudflare-r2 fonctionnels (P0) ; whatsapp/tiktok/facebook squelettes
-    lib/                 → logger + ai (chatText/chatJson) + brand fonctionnels ;
-                           database/storage/scheduler/metrics squelettes
+    providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) + r2 fonctionnel (P6) ;
+                           supabase fonctionnel (P0) ; whatsapp/tiktok/facebook squelettes
+    lib/                 → logger + ai + brand + storage (R2 + manifest) fonctionnels ;
+                           database/scheduler/metrics squelettes
+  supabase/init.sql      → schéma SQL prêt à exécuter (tables files + content, PRD §29)
 ```
 
-Rappel des phases restantes (PRD §37) : 6 Storage → 7 QC → 8 WhatsApp → 9 Publication →
+Rappel des phases restantes (PRD §37) : 7 QC → 8 WhatsApp → 9 Publication →
 10 Analytics → 11 Learning.
 
 ---
@@ -231,6 +258,8 @@ Rappel des phases restantes (PRD §37) : 6 Storage → 7 QC → 8 WhatsApp → 9
 | Repli catégoriel B-roll marqué « contenu non vérifié » | limite connue Phase 2 (noms Pixabay) : jamais présenté comme une certitude |
 | FFmpeg 9.0.1 via winget + `FFMPEG_PATH`/`FFPROBE_PATH` | montage local réel (Phase 5) ; chemins dans `.env.local`, optionnels dans `.env.example` |
 | Video Engine v1 (segments + concat + mixage) | PRD §13 ; rendu local (Vercel/worker envisagés plus tard, PRD §3.8) |
+| Upload Cloudflare R2 réel (bucket `marketing243`) | `lib/storage` avec forcePathStyle + endpoint déduit de l'Account ID (bug `??` vs `||` corrigé) ; métadonnées manifest local + `supabase/init.sql` prêt |
+| Jeton R2 recréé par l'utilisateur | le 1er jeton était en lecture seule (« Access Denied » à l'écriture) → recréation avec `Object Read & Write` |
 
 ---
 
@@ -253,21 +282,21 @@ Rappel des phases restantes (PRD §37) : 6 Storage → 7 QC → 8 WhatsApp → 9
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 6 : Storage
+## 🚦 PROCHAINE SESSION — PHASE 7 : QC
 
 Définition (PRD §37) :
-- [ ] upload R2 (voix off, vidéos, exports → Cloudflare R2)
-- [ ] métadonnées Supabase (liens fichiers, tailles, statuts — PRD §14/§29/§30)
-- [ ] versioning
-- [ ] previews
-- [ ] file status
+- [ ] contrôle automatique (PRD §17 : vertical, durée 30-60 s, voix claire, sous-titres présents,
+      CTA présent, aucun asset incorrect…)
+- [ ] score qualité (ex. /100)
+- [ ] correction (retour vers Video Engine si échec)
+- [ ] validation (statut READY_FOR_APPROVAL, PRD §15)
 
-**Prérequis identifiés :**
-1. **Clés Cloudflare R2 encore vides** dans `.env.local` (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-   `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`) → à fournir par l'utilisateur + création du bucket.
-2. Schéma Supabase : table(s) contenus/fichiers à créer (PRD §29) — les clés Supabase existent déjà.
-3. R2 est l'entrepôt distant (le cloud n'a pas accès à `output/` local) — c'est la bascule « la
-   machine travaille sans le PC » amorcée par l'utilisateur.
+**Prérequis / remarques :**
+- Outils déjà en place : FFprobe (durée/résolution réelles), assets, fichiers sur R2, plan visuel P4.
+- Le QC reste en code déterministe (PRD §3.6) : vérifications FFprobe + règles ; pas d'IA pour les
+  mesures (une analyse visuelle IA pourra venir plus tard si nécessaire).
+- Point utilisateur en attente : exécuter `supabase/init.sql` (SQL Editor Supabase) pour brancher
+  les métadonnées Supabase (suivi Phase 6).
 
 ---
 
@@ -301,3 +330,7 @@ Définition (PRD §37) :
 - **Phase 5 — Video** : FFmpeg 9.0.1 installé (winget), Video Engine réel (segments 1080×1920,
   texte à l'écran, concaténation, voix + musique, export MP4). Démo `npm run demo:video` vérifiée
   (MP4 5,1 Mo, 35 s mesurées). Commit `5550e0b`.
+- **Phase 6 — Storage** : clés R2 fournies (1er jeton en lecture seule → recréé en `Object Read &
+  Write`), `lib/storage` (upload réel + checksum + versioning + statuts en manifest), `supabase/init.sql`
+  prêt. Démo `npm run demo:storage` vérifiée (voix v3 + vidéo v1 PRÉSENTES sur R2, bucket `marketing243`).
+  Commit : à noter après push.
