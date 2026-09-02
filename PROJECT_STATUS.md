@@ -270,4 +270,4 @@ Définition (PRD §37) :
   le provider. Commit `4ad310f`.
 - **Phase 4 — Visual + Templates** : Template Engine (règles par rôle PRD §10, 3 styles visuels) +
   Visual Engine (plan de montage scène par scène, caractéristiques PRD §11). Démo
-  `npm run demo:visual` vérifiée sur les 58 assets. Commit : à noter après push.
+  `npm run demo:visual` vérifiée sur les 58 assets. Commit `f8ab44b`.
