@@ -11,7 +11,8 @@
     "demo:brain": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-brain.ts",
     "demo:assets": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-assets.ts",
     "demo:voice": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-voice.ts",
-    "demo:visual": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-visual.ts"
+    "demo:visual": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-visual.ts",
+    "demo:video": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-video.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1124.0",

@@ -59,6 +59,9 @@ npm run demo:voice
 
 # 8. Démo Visual + Templates (Phase 4) — plan visuel sur la bibliothèque locale
 npm run demo:visual
+
+# 9. Démo Video (Phase 5) — montage MP4 réel (nécessite FFmpeg + une voix générée)
+npm run demo:video
 ```
 
 ## Structure des modules (PRD §4)

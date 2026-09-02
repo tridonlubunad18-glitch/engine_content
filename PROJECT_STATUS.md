@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 4 — Visual + Templates
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (plan visuel réel construit sur les 58 assets)
-**Prochaine phase :** PHASE 5 — Video (FFmpeg + Video Engine + sous-titres, musique, B-roll, export MP4)
+**Phase courante :** PHASE 5 — Video
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (première vidéo MP4 réelle montée : 35 s, 1080×1920)
+**Prochaine phase :** PHASE 6 — Storage (upload R2 + métadonnées Supabase, versioning, previews)
 
 ---
 
@@ -149,6 +149,31 @@
 
 ---
 
+## ✅ Checklist PHASE 5 — Video (PRD §37)
+
+- [x] **FFmpeg** — installé (winget Gyan.FFmpeg 9.0.1) ; chemins `FFMPEG_PATH`/`FFPROBE_PATH`
+      ajoutés à `.env.local` (optionnels dans `.env.example`)
+- [x] **Video Engine** — `src/engines/video-engine` : montage vertical réel (PRD §3.8/§13) :
+      segments par scène (assets vidéo/image recadrés 1080×1920), texte à l'écran en bas
+      (drawtext + police système), concaténation, mixage audio (voix off + musique bas volume),
+      export MP4 H.264
+- [x] **sous-titres / texte à l'écran** — texte fort par scène (depuis le script/plan visuel)
+- [x] **musique** — asset `music/` mixé en fond (volume 0.12, fondu de fin)
+- [x] **voix + B-roll + captures** — voix off Phase 3 + assets réels P2 intégrés
+- [x] **export MP4 + mesure** — durée réelle lue via ffprobe
+- [x] **Outil de test** — `scripts/demo-video.ts` + `npm run demo:video`
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:video` | ✅ **MP4 5,1 Mo, 35 s** (durée réelle mesurée 35,0 s par ffprobe), 5 segments encodés |
+| Composition | 2 B-roll + 1 capture + 1 app-video + 1 Goal-IA + voix off + musique |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+| `output/video/` ignoré par git | ✅ (via `/output/`) |
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -157,23 +182,24 @@ root/
   PROJECT_STATUS.md      → ce fichier
   README.md              → guide du projet
   .env.example           → variables requises (jamais de secrets réels)
-  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain/assets/voice/visual
+  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain/assets/voice/visual/video
   scripts/demo-brain.ts  → démo Phase 1 (chaîne stratégie → script, DeepSeek réel)
   scripts/demo-assets.ts → démo Phase 2 (scan + recherche + détection de manques, assets réels)
   scripts/demo-voice.ts  → démo Phase 3 (voix off réelle, rotation multi-comptes ElevenLabs)
   scripts/demo-visual.ts → démo Phase 4 (plan visuel : script + assets réels → plan de montage)
+  scripts/demo-video.ts  → démo Phase 5 (montage MP4 réel : scènes + voix + musique)
   src/
     app/                 → layout + page minimale (Phase 0)
     engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) +
-                           template/visual (P4) implémentés ; 6 moteurs en squelettes
+                           template/visual (P4) + video (P5) implémentés ; 5 moteurs en squelettes
     providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) implémentés ;
                            supabase + cloudflare-r2 fonctionnels (P0) ; whatsapp/tiktok/facebook squelettes
     lib/                 → logger + ai (chatText/chatJson) + brand fonctionnels ;
                            database/storage/scheduler/metrics squelettes
 ```
 
-Rappel des phases restantes (PRD §37) : 5 Video → 6 Storage → 7 QC → 8 WhatsApp →
-9 Publication → 10 Analytics → 11 Learning.
+Rappel des phases restantes (PRD §37) : 6 Storage → 7 QC → 8 WhatsApp → 9 Publication →
+10 Analytics → 11 Learning.
 
 ---
 
@@ -203,6 +229,8 @@ Rappel des phases restantes (PRD §37) : 5 Video → 6 Storage → 7 QC → 8 Wh
 | `.env.local` réordonné après sondage réel | anciens #1/#2 : synthèse refusée (quota côté API malgré l'écran) ; le compte fonctionnel (80k) est passé en `ELEVENLABS_API_KEY_01` |
 | Template/Visual Engines 100 % déterministes (règles par rôle, styles) | PRD §3.6/§10/§12 : aucune IA pour le plan de montage ; caractéristiques PRD §11 calculées en code |
 | Repli catégoriel B-roll marqué « contenu non vérifié » | limite connue Phase 2 (noms Pixabay) : jamais présenté comme une certitude |
+| FFmpeg 9.0.1 via winget + `FFMPEG_PATH`/`FFPROBE_PATH` | montage local réel (Phase 5) ; chemins dans `.env.local`, optionnels dans `.env.example` |
+| Video Engine v1 (segments + concat + mixage) | PRD §13 ; rendu local (Vercel/worker envisagés plus tard, PRD §3.8) |
 
 ---
 
@@ -225,22 +253,21 @@ Rappel des phases restantes (PRD §37) : 5 Video → 6 Storage → 7 QC → 8 Wh
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 5 : Video
+## 🚦 PROCHAINE SESSION — PHASE 6 : Storage
 
 Définition (PRD §37) :
-- [ ] FFmpeg (montage)
-- [ ] Video Engine — PRD §3.8/§13 : assemblage scènes + voix off + musique + sous-titres + B-roll
-      + captures Goal-IA → export MP4 vertical
-- [ ] sous-titres (à partir du plan visuel Phase 4 : word-pop/bottom/minimal)
-- [ ] musique (assets `music/`)
-- [ ] voix (MP3 Phase 3) + B-roll + captures
-- [ ] export MP4 (vertical 9:16, 30-60 s)
+- [ ] upload R2 (voix off, vidéos, exports → Cloudflare R2)
+- [ ] métadonnées Supabase (liens fichiers, tailles, statuts — PRD §14/§29/§30)
+- [ ] versioning
+- [ ] previews
+- [ ] file status
 
 **Prérequis identifiés :**
-1. **FFmpeg non installé sur la machine** (vérifié le 02/09/2026) → à installer
-   (ex. build statique gyan.dev / winget) avant le montage réel ; à confirmer avec l'utilisateur.
-2. Le Video Engine consommera : script (P1) + plan visuel/assets (P2/P4) + voix (P3).
-3. Rendu lourd : à exécuter en local (P5) ; Vercel/worker prévus plus tard (PRD §3.8).
+1. **Clés Cloudflare R2 encore vides** dans `.env.local` (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+   `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`) → à fournir par l'utilisateur + création du bucket.
+2. Schéma Supabase : table(s) contenus/fichiers à créer (PRD §29) — les clés Supabase existent déjà.
+3. R2 est l'entrepôt distant (le cloud n'a pas accès à `output/` local) — c'est la bascule « la
+   machine travaille sans le PC » amorcée par l'utilisateur.
 
 ---
 
@@ -271,3 +298,6 @@ Définition (PRD §37) :
 - **Phase 4 — Visual + Templates** : Template Engine (règles par rôle PRD §10, 3 styles visuels) +
   Visual Engine (plan de montage scène par scène, caractéristiques PRD §11). Démo
   `npm run demo:visual` vérifiée sur les 58 assets. Commit `f8ab44b`.
+- **Phase 5 — Video** : FFmpeg 9.0.1 installé (winget), Video Engine réel (segments 1080×1920,
+  texte à l'écran, concaténation, voix + musique, export MP4). Démo `npm run demo:video` vérifiée
+  (MP4 5,1 Mo, 35 s mesurées). Commit : à noter après push.
