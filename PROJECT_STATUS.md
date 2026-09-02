@@ -234,4 +234,4 @@ Définition (PRD §37) :
   différée à la Phase 8, décision utilisateur). Démo `npm run demo:assets` vérifiée.
 - **Phase 3 — Voix** : provider ElevenLabs multi-comptes (3 clés de 3 comptes, rotation auto sur
   quota — validée en réel : clé #1 401 → clé #2 OK), Voice Engine → MP3 local `output/voice/`
-  (R2 en Phase 6). Démo `npm run demo:voice` vérifiée (458 Ko, ~32 s). Commit : à noter après push.
+  (R2 en Phase 6). Démo `npm run demo:voice` vérifiée (458 Ko, ~32 s). Commit `9e8966f`.
