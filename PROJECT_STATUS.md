@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 3 — Voix
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (voix ElevenLabs réelle générée — rotation multi-comptes testée)
-**Prochaine phase :** PHASE 4 — Visual + Templates (Visual Engine, Template Engine, styles visuels)
+**Phase courante :** PHASE 4 — Visual + Templates
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (plan visuel réel construit sur les 58 assets)
+**Prochaine phase :** PHASE 5 — Video (FFmpeg + Video Engine + sous-titres, musique, B-roll, export MP4)
 
 ---
 
@@ -124,6 +124,31 @@
 
 ---
 
+## ✅ Checklist PHASE 4 — Visual + Templates (PRD §37)
+
+- [x] **Template Engine** — `src/engines/template-engine` : règles visuelles PAR RÔLE (PRD §10 :
+      HOOK→texte fort, PROBLÈME→B-roll, DÉMO→capture, CTA→Goal-IA+texte), 3 styles visuels
+      (`impact-rapide`, `clair-didactique`, `emotionnel`), paramètres de montage
+- [x] **Visual Engine** — `src/engines/visual-engine` : `buildVisualPlan()` → pour chaque scène :
+      asset sélectionné (Asset Engine P2), mode visuel, transition, zoom, emphase de texte
+- [x] **styles visuels + paramètres de montage** — sous-titres (word-pop/bottom/minimal),
+      énergie musicale, intensité des zooms
+- [x] **caractéristiques PRD §11** — `VisualCharacteristics` : brollRatio, goalIaRatio,
+      textOverlayRatio, transitionFrequency, zoomFrequency, ctaPositionSec, etc. (pour apprentissage futur)
+- [x] **mapping scènes → assets** — via les `visualHint` et l'Asset Engine ; repli catégoriel
+      documenté (contenu B-roll non vérifié) ; aucun asset inventé (PRD §9)
+- [x] **Outil de test** — `scripts/demo-visual.ts` + `npm run demo:visual`
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:visual` | ✅ plan visuel construit : 5 scènes → 3 assets réels utilisés, 0 manquant |
+| Caractéristiques PRD §11 | ✅ brollRatio 0.34, goalIaRatio 0.66, ctaPosition 30 s, zoomFrequency 0.6 (style impact-rapide) |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -132,22 +157,23 @@ root/
   PROJECT_STATUS.md      → ce fichier
   README.md              → guide du projet
   .env.example           → variables requises (jamais de secrets réels)
-  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain, demo:assets, demo:voice
+  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain/assets/voice/visual
   scripts/demo-brain.ts  → démo Phase 1 (chaîne stratégie → script, DeepSeek réel)
   scripts/demo-assets.ts → démo Phase 2 (scan + recherche + détection de manques, assets réels)
   scripts/demo-voice.ts  → démo Phase 3 (voix off réelle, rotation multi-comptes ElevenLabs)
+  scripts/demo-visual.ts → démo Phase 4 (plan visuel : script + assets réels → plan de montage)
   src/
     app/                 → layout + page minimale (Phase 0)
-    engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) implémentés ;
-                           8 autres moteurs en squelettes annotés
+    engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) +
+                           template/visual (P4) implémentés ; 6 moteurs en squelettes
     providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) implémentés ;
                            supabase + cloudflare-r2 fonctionnels (P0) ; whatsapp/tiktok/facebook squelettes
     lib/                 → logger + ai (chatText/chatJson) + brand fonctionnels ;
                            database/storage/scheduler/metrics squelettes
 ```
 
-Rappel des phases restantes (PRD §37) : 4 Visual+Templates → 5 Video → 6 Storage →
-7 QC → 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
+Rappel des phases restantes (PRD §37) : 5 Video → 6 Storage → 7 QC → 8 WhatsApp →
+9 Publication → 10 Analytics → 11 Learning.
 
 ---
 
@@ -175,6 +201,8 @@ Rappel des phases restantes (PRD §37) : 4 Visual+Templates → 5 Video → 6 St
 | Voix off stockées en local `output/voice/` | clés R2 encore vides (décision) : écriture locale, branchement R2 à la Phase 6 |
 | Mémoire du compte préféré dans le provider ElevenLabs | après succès d'un compte, il est réessayé en premier (appels suivants rapides, logs propres) |
 | `.env.local` réordonné après sondage réel | anciens #1/#2 : synthèse refusée (quota côté API malgré l'écran) ; le compte fonctionnel (80k) est passé en `ELEVENLABS_API_KEY_01` |
+| Template/Visual Engines 100 % déterministes (règles par rôle, styles) | PRD §3.6/§10/§12 : aucune IA pour le plan de montage ; caractéristiques PRD §11 calculées en code |
+| Repli catégoriel B-roll marqué « contenu non vérifié » | limite connue Phase 2 (noms Pixabay) : jamais présenté comme une certitude |
 
 ---
 
@@ -197,22 +225,22 @@ Rappel des phases restantes (PRD §37) : 4 Visual+Templates → 5 Video → 6 St
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 4 : Visual + Templates
+## 🚦 PROCHAINE SESSION — PHASE 5 : Video
 
 Définition (PRD §37) :
-- [ ] Visual Engine — PRD §10 : transformer un script en plan visuel (rythme, scènes,
-      alternance B-roll / captures Goal-IA, texte à l'écran, zooms/crops, transitions,
-      sous-titres, intensité, position du CTA)
-- [ ] Template Engine — PRD §12 : templates réutilisables (déjà ébauchés en Phase 1 via
-      `TEMPLATE_ROLES`) avec paramètres de montage ajustables
-- [ ] styles visuels
-- [ ] paramètres de montage
-- [ ] mapping scènes → assets (s'appuie sur l'Asset Engine Phase 2 et les `visualHint` des scènes)
+- [ ] FFmpeg (montage)
+- [ ] Video Engine — PRD §3.8/§13 : assemblage scènes + voix off + musique + sous-titres + B-roll
+      + captures Goal-IA → export MP4 vertical
+- [ ] sous-titres (à partir du plan visuel Phase 4 : word-pop/bottom/minimal)
+- [ ] musique (assets `music/`)
+- [ ] voix (MP3 Phase 3) + B-roll + captures
+- [ ] export MP4 (vertical 9:16, 30-60 s)
 
-**Prérequis / remarques :**
-- Aucun service externe requis (logique déterministe + assets locaux déjà présents).
-- Le mapping `visualHint` → asset se fera via l'Asset Engine (limite connue : B-roll Pixabay
-  non descriptif → sélection catégorielle).
+**Prérequis identifiés :**
+1. **FFmpeg non installé sur la machine** (vérifié le 02/09/2026) → à installer
+   (ex. build statique gyan.dev / winget) avant le montage réel ; à confirmer avec l'utilisateur.
+2. Le Video Engine consommera : script (P1) + plan visuel/assets (P2/P4) + voix (P3).
+3. Rendu lourd : à exécuter en local (P5) ; Vercel/worker prévus plus tard (PRD §3.8).
 
 ---
 
@@ -237,3 +265,9 @@ Définition (PRD §37) :
 - **Phase 3 — Voix** : provider ElevenLabs multi-comptes (3 clés de 3 comptes, rotation auto sur
   quota — validée en réel : clé #1 401 → clé #2 OK), Voice Engine → MP3 local `output/voice/`
   (R2 en Phase 6). Démo `npm run demo:voice` vérifiée (458 Ko, ~32 s). Commit `9e8966f`.
+- **Résolution ElevenLabs** : permissions clé #1 corrigées (dashboard), quotas réels sondés via
+  synthèse ; `.env.local` réordonné (compte fonctionnel en #01) + mémoire du compte préféré dans
+  le provider. Commit `4ad310f`.
+- **Phase 4 — Visual + Templates** : Template Engine (règles par rôle PRD §10, 3 styles visuels) +
+  Visual Engine (plan de montage scène par scène, caractéristiques PRD §11). Démo
+  `npm run demo:visual` vérifiée sur les 58 assets. Commit : à noter après push.

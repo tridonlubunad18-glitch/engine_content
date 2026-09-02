@@ -56,6 +56,9 @@ npm run demo:assets
 
 # 7. Démo Voice Engine (Phase 3) — voix off ElevenLabs (nécessite ELEVENLABS_API_KEY_01…)
 npm run demo:voice
+
+# 8. Démo Visual + Templates (Phase 4) — plan visuel sur la bibliothèque locale
+npm run demo:visual
 ```
 
 ## Structure des modules (PRD §4)
