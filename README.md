@@ -53,6 +53,9 @@ npm run demo:brain
 
 # 6. Démo Asset Engine (Phase 2) — scan la bibliothèque locale assets/
 npm run demo:assets
+
+# 7. Démo Voice Engine (Phase 3) — voix off ElevenLabs (nécessite ELEVENLABS_API_KEY_01…)
+npm run demo:voice
 ```
 
 ## Structure des modules (PRD §4)

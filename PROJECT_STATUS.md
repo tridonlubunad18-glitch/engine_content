@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 2 — Assets
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (démo réelle sur 58 assets)
-**Prochaine phase :** PHASE 3 — Voix (ElevenLabs + Voice Engine + stockage R2)
+**Phase courante :** PHASE 3 — Voix
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (voix ElevenLabs réelle générée — rotation multi-comptes testée)
+**Prochaine phase :** PHASE 4 — Visual + Templates (Visual Engine, Template Engine, styles visuels)
 
 ---
 
@@ -101,6 +101,29 @@
 
 ---
 
+## ✅ Checklist PHASE 3 — Voix (PRD §37)
+
+- [x] **ElevenLabs provider** — `src/providers/elevenlabs` : synthèse MP3, timeout, erreurs typées, isolé/remplaçable
+- [x] **Multi-comptes** — décision utilisateur : 3 comptes gratuits ~10k crédits/mois. Formats `ELEVENLABS_API_KEY_01…`,
+      `ELEVENLABS_API_KEYS` (liste) et `ELEVENLABS_API_KEY`. Rotation automatique sur quota (HTTP 401/402/429) ;
+      logs sans jamais révéler les clés
+- [x] **Voice Engine** — `src/engines/voice-engine` : `generateVoiceover()` texte → MP3 local `output/voice/`
+      (durée estimée par mots/min ; R2 branché à la Phase 6)
+- [x] **génération** — `npm run demo:voice` : voix réelle générée (458 Ko, ~32 s, voix « Roger »)
+- [x] **stockage R2** — différé à la Phase 6 (décision) : clés R2 encore vides ; écriture locale en attendant
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:voice` | ✅ MP3 généré `output/voice/demo-coupons-*.mp3` (458 Ko, ~32 s estimées) |
+| Rotation multi-comptes | ✅ **clé #1 HTTP 401 (invalide) → bascule auto sur clé #2** réussie (3 comptes configurés) |
+| Voix sélectionnée | « Roger - Laid-Back… » (première voix du compte #2) — configurable via `ELEVENLABS_VOICE_ID` |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+| `output/` ignoré par git | ✅ vérifié |
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -109,20 +132,21 @@ root/
   PROJECT_STATUS.md      → ce fichier
   README.md              → guide du projet
   .env.example           → variables requises (jamais de secrets réels)
-  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain, demo:assets
+  package.json           → scripts : dev, build, start, lint, typecheck, demo:brain, demo:assets, demo:voice
   scripts/demo-brain.ts  → démo Phase 1 (chaîne stratégie → script, DeepSeek réel)
   scripts/demo-assets.ts → démo Phase 2 (scan + recherche + détection de manques, assets réels)
+  scripts/demo-voice.ts  → démo Phase 3 (voix off réelle, rotation multi-comptes ElevenLabs)
   src/
     app/                 → layout + page minimale (Phase 0)
-    engines/             → strategy/angle/hook/script (Phase 1) + asset (Phase 2) implémentés ;
-                           9 autres moteurs en squelettes annotés
-    providers/           → deepseek implémenté (Phase 1) ; supabase + cloudflare-r2
-                           fonctionnels (Phase 0) ; elevenlabs/whatsapp/tiktok/facebook squelettes
+    engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) implémentés ;
+                           8 autres moteurs en squelettes annotés
+    providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) implémentés ;
+                           supabase + cloudflare-r2 fonctionnels (P0) ; whatsapp/tiktok/facebook squelettes
     lib/                 → logger + ai (chatText/chatJson) + brand fonctionnels ;
                            database/storage/scheduler/metrics squelettes
 ```
 
-Rappel des phases restantes (PRD §37) : 3 Voix → 4 Visual+Templates → 5 Video → 6 Storage →
+Rappel des phases restantes (PRD §37) : 4 Visual+Templates → 5 Video → 6 Storage →
 7 QC → 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
 
 ---
@@ -147,6 +171,8 @@ Rappel des phases restantes (PRD §37) : 3 Voix → 4 Visual+Templates → 5 Vid
 | Assets réels en local `assets/` (ignoré par git) | PRD §8 : l'utilisateur fournit les assets ; jamais commités ; migration cloud (R2/Supabase Storage) à la Phase 6 |
 | Asset Engine 100 % déterministe (scan, mots-clés, catégories) | PRD §3.6 : jamais d'IA pour recherche/tri ; limite documentée : B-roll Pixabay non descriptif → sélection catégorielle |
 | Notification d'asset manquant différée à la Phase 8 | décision utilisateur (option A1) : manque journalisé + statut BLOCKED en attendant WhatsApp |
+| ElevenLabs multi-comptes (3 formats de clés, rotation auto) | plusieurs comptes gratuits ~10k crédits/mois ; bascule sur 401/402/429 — validée en réel (clé #1 401 → clé #2 OK) |
+| Voix off stockées en local `output/voice/` | clés R2 encore vides (décision) : écriture locale, branchement R2 à la Phase 6 |
 
 ---
 
@@ -169,20 +195,22 @@ Rappel des phases restantes (PRD §37) : 3 Voix → 4 Visual+Templates → 5 Vid
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 3 : Voix
+## 🚦 PROCHAINE SESSION — PHASE 4 : Visual + Templates
 
 Définition (PRD §37) :
-- [ ] ElevenLabs (provider + clef)
-- [ ] Voice Engine
-- [ ] génération (texte de la Phase 1 → audio)
-- [ ] stockage R2
+- [ ] Visual Engine — PRD §10 : transformer un script en plan visuel (rythme, scènes,
+      alternance B-roll / captures Goal-IA, texte à l'écran, zooms/crops, transitions,
+      sous-titres, intensité, position du CTA)
+- [ ] Template Engine — PRD §12 : templates réutilisables (déjà ébauchés en Phase 1 via
+      `TEMPLATE_ROLES`) avec paramètres de montage ajustables
+- [ ] styles visuels
+- [ ] paramètres de montage
+- [ ] mapping scènes → assets (s'appuie sur l'Asset Engine Phase 2 et les `visualHint` des scènes)
 
-**Requis avant de démarrer :**
-1. Clef API **ElevenLabs** (`ELEVENLABS_API_KEY` — actuellement vide dans `.env.local`) + modèle/voix à utiliser.
-2. Clés **Cloudflare R2** (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
-   — vides dans `.env.local`) : la Phase 3 prévoit le stockage R2 des voix off (PRD §37).
-   Alternative si R2 pas prêt : stockage local temporaire, upload en Phase 6 — à trancher avec l'utilisateur.
-3. Le Voice Engine consommera `voiceoverText` des scripts Phase 1 → chaîne de test : script → voix → fichier.
+**Prérequis / remarques :**
+- Aucun service externe requis (logique déterministe + assets locaux déjà présents).
+- Le mapping `visualHint` → asset se fera via l'Asset Engine (limite connue : B-roll Pixabay
+  non descriptif → sélection catégorielle).
 
 ---
 
@@ -204,3 +232,6 @@ Définition (PRD §37) :
 - **Phase 2 — Assets** : Asset Engine 100 % déterministe — scan (58 assets réels), recherche
   (mots-clés + catégories), détection d'assets manquants journalisée + statut BLOCKED (WhatsApp
   différée à la Phase 8, décision utilisateur). Démo `npm run demo:assets` vérifiée.
+- **Phase 3 — Voix** : provider ElevenLabs multi-comptes (3 clés de 3 comptes, rotation auto sur
+  quota — validée en réel : clé #1 401 → clé #2 OK), Voice Engine → MP3 local `output/voice/`
+  (R2 en Phase 6). Démo `npm run demo:voice` vérifiée (458 Ko, ~32 s). Commit : à noter après push.

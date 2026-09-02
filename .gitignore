@@ -46,3 +46,6 @@ next-env.d.ts
 # bibliothèque d'assets privée (PRD §8) — jamais commitée
 /assets/
 
+# sorties de génération locale (voix off, previews…) — jamais commitées
+/output/
+
