@@ -333,4 +333,4 @@ Définition (PRD §37) :
 - **Phase 6 — Storage** : clés R2 fournies (1er jeton en lecture seule → recréé en `Object Read &
   Write`), `lib/storage` (upload réel + checksum + versioning + statuts en manifest), `supabase/init.sql`
   prêt. Démo `npm run demo:storage` vérifiée (voix v3 + vidéo v1 PRÉSENTES sur R2, bucket `marketing243`).
-  Commit : à noter après push.
+  Commit `cf57841`.
