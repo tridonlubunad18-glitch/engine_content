@@ -360,4 +360,4 @@ Définition (PRD §37 + §3.10/§24/§25) :
   dans `lib/storage` (2 lignes réelles). Commit `ef97949`.
 - **Phase 7 — QC** : Quality Engine FFprobe (score /100, PASS/WARN/FAIL), suggestions de correction,
   validation READY_FOR_APPROVAL. Démo `npm run demo:qc` vérifiée : **100/100 PASS** sur la vidéo P5.
-  Commit : à noter après push.
+  Commit `9e7a326`.
