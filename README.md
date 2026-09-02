@@ -47,6 +47,9 @@ npm run dev                  # http://localhost:3000
 npm run lint
 npm run typecheck
 npm run build
+
+# 5. Démo du cerveau (Phase 1) — nécessite DEEPSEEK_API_KEY dans .env.local
+npm run demo:brain
 ```
 
 ## Structure des modules (PRD §4)
