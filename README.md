@@ -67,6 +67,22 @@ src/
 
 Chaque moteur/provider est construit **uniquement lors de sa phase** (voir les phases dans PRD §37 et l'état d'avancement dans `PROJECT_STATUS.md`).
 
+## Assets locaux (PRD §8)
+
+Bibliothèque privée des matières premières — **jamais poussée sur GitHub** (dossier `/assets/` ignoré par git).
+
+| Dossier | Contenu |
+|---|---|
+| `assets/goal-ia/` | Vidéos de présentation / démo du produit Goal-IA (mp4) |
+| `assets/screenshots/` | Captures d'écran de l'application (png, jpg, webp) |
+| `assets/app-videos/` | Enregistrements vidéo de l'application en action (mp4) |
+| `assets/broll/` | Plans d'illustration libres de droits (parieur, téléphone, sport…) |
+| `assets/music/` | Musiques libres de droits (mp3, wav) |
+| `assets/logos/` | Logos Goal-IA (png, svg) |
+| `assets/templates/` | Templates de montage / overlays réutilisables |
+
+> ⚠️ N'y déposer **aucun secret**. Les fichiers lourds produits (voix, vidéos finales) iront dans **Cloudflare R2** (PRD §3.5/§30), pas ici.
+
 ## Sécurité (PRD §33)
 
 - Secrets uniquement dans `.env.local` et les variables d'environnement Vercel.

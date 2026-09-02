@@ -43,3 +43,6 @@ next-env.d.ts
 # env example (versionné volontairement)
 !.env.example
 
+# bibliothèque d'assets privée (PRD §8) — jamais commitée
+/assets/
+
