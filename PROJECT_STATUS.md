@@ -300,4 +300,4 @@ Définition (PRD §37) :
   `npm run demo:visual` vérifiée sur les 58 assets. Commit `f8ab44b`.
 - **Phase 5 — Video** : FFmpeg 9.0.1 installé (winget), Video Engine réel (segments 1080×1920,
   texte à l'écran, concaténation, voix + musique, export MP4). Démo `npm run demo:video` vérifiée
-  (MP4 5,1 Mo, 35 s mesurées). Commit : à noter après push.
+  (MP4 5,1 Mo, 35 s mesurées). Commit `5550e0b`.
