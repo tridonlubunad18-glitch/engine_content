@@ -173,6 +173,8 @@ Rappel des phases restantes (PRD §37) : 4 Visual+Templates → 5 Video → 6 St
 | Notification d'asset manquant différée à la Phase 8 | décision utilisateur (option A1) : manque journalisé + statut BLOCKED en attendant WhatsApp |
 | ElevenLabs multi-comptes (3 formats de clés, rotation auto) | plusieurs comptes gratuits ~10k crédits/mois ; bascule sur 401/402/429 — validée en réel (clé #1 401 → clé #2 OK) |
 | Voix off stockées en local `output/voice/` | clés R2 encore vides (décision) : écriture locale, branchement R2 à la Phase 6 |
+| Mémoire du compte préféré dans le provider ElevenLabs | après succès d'un compte, il est réessayé en premier (appels suivants rapides, logs propres) |
+| `.env.local` réordonné après sondage réel | anciens #1/#2 : synthèse refusée (quota côté API malgré l'écran) ; le compte fonctionnel (80k) est passé en `ELEVENLABS_API_KEY_01` |
 
 ---
 

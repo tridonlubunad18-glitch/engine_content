@@ -102,6 +102,22 @@ export class ElevenLabsProvider {
   /** Voix résolue par compte (la clé ne sert que d'index interne, jamais loggée). */
   private readonly voiceCache = new Map<string, VoiceSummary>();
 
+  /** Compte ayant réussi la dernière synthèse (mémoire intra-processus). */
+  private preferredKeyIndex: number | null = null;
+
+  /** Ordre de tentative : compte préféré d'abord, puis les autres. */
+  private buildAttemptOrder(count: number): number[] {
+    const preferred = this.preferredKeyIndex;
+    if (preferred !== null && preferred >= 0 && preferred < count) {
+      const order = [preferred];
+      for (let i = 0; i < count; i += 1) {
+        if (i !== preferred) order.push(i);
+      }
+      return order;
+    }
+    return Array.from({ length: count }, (_, index) => index);
+  }
+
   private async resolveDefaultVoice(apiKey: string): Promise<VoiceSummary> {
     const cached = this.voiceCache.get(apiKey);
     if (cached) return cached;
@@ -175,9 +191,10 @@ export class ElevenLabsProvider {
       input.modelId?.trim() || process.env.ELEVENLABS_MODEL?.trim() || "";
     let lastError: unknown;
 
-    for (let index = 0; index < keys.length; index += 1) {
-      const keyIndex = index + 1;
-      const apiKey = keys[index];
+    const attemptOrder = this.buildAttemptOrder(keys.length);
+    for (const position of attemptOrder) {
+      const keyIndex = position + 1;
+      const apiKey = keys[position];
 
       const voice =
         input.voiceId?.trim() !== undefined && input.voiceId.trim() !== ""
@@ -232,6 +249,7 @@ export class ElevenLabsProvider {
           throw new ElevenLabsError("Réponse audio vide.");
         }
 
+        this.preferredKeyIndex = position;
         logger.info("ElevenLabs : voix générée", {
           keyIndex,
           voiceId: voice.voiceId,
@@ -267,6 +285,8 @@ export class ElevenLabsProvider {
       }
     }
 
+    // Aucun compte n'a fonctionné : on oublie la préférence pour le prochain appel.
+    this.preferredKeyIndex = null;
     throw new ElevenLabsError(
       `Toutes les clés ElevenLabs sont épuisées ou invalides (${keys.length} compte(s) essayé(s)).`,
       { cause: lastError },
