@@ -70,9 +70,15 @@ async function main(): Promise<void> {
     }
   }
 
-  // 4) Métadonnées (manifest local)
+  // 4) Métadonnées (manifest local + Supabase si table prête)
   const records = await storageService.listAll();
   console.log(`\nMétadonnées (manifest local) : ${records.length} enregistrement(s)`);
+  const supabaseCount = await storageService.countSupabaseFiles();
+  if (supabaseCount === null) {
+    console.log("Métadonnées Supabase : table « files » absente → exécuter supabase/init.sql");
+  } else {
+    console.log(`Métadonnées Supabase : ${supabaseCount} ligne(s) dans « files » ✅`);
+  }
 
   console.log("\n✅ Démo Phase 6 terminée — le stockage R2 fonctionne.");
 }

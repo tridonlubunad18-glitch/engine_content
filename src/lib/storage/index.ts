@@ -26,8 +26,15 @@ import {
   getR2Bucket,
   getR2Client,
 } from "@/providers/cloudflare-r2";
+import { getSupabaseClient } from "@/providers/supabase";
 
 const logger = createLogger("lib:storage");
+
+/**
+ * Mémoire locale de l'état Supabase : null = inconnu, true = table prête,
+ * false = table absente (on évite de re-tenter à chaque upload).
+ */
+let supabaseReady: boolean | null = null;
 
 export type FileKind =
   | "voice"
@@ -159,6 +166,7 @@ export class StorageService {
       sha256,
     });
     await this.persist(record);
+    await this.mirrorToSupabase(record);
 
     logger.info("Upload R2 réussi", {
       key,
@@ -189,6 +197,86 @@ export class StorageService {
   /** Liste les métadonnées connues (manifest local). */
   async listAll(): Promise<StoredFileMeta[]> {
     return readManifest();
+  }
+
+  /** Compte les lignes `files` dans Supabase (null si table indisponible). */
+  async countSupabaseFiles(): Promise<number | null> {
+    try {
+      const client = getSupabaseClient();
+      const { count, error } = await client
+        .from("files")
+        .select("id", { count: "exact", head: true });
+      if (error) {
+        logger.warn("Supabase files indisponible", {
+          message: error.message,
+        });
+        supabaseReady = false;
+        return null;
+      }
+      if (count === null) {
+        supabaseReady = false;
+        return null;
+      }
+      supabaseReady = true;
+      return count;
+    } catch (error) {
+      logger.warn("Supabase files indisponible", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Miroir Supabase (PRD §30 : métadonnées dans la mémoire). Upsert par
+   * content_key → une ligne = dernier état de la clé. Non bloquant si la
+   * table n'existe pas encore (supabase/init.sql à exécuter).
+   */
+  private async mirrorToSupabase(record: StoredFileMeta): Promise<void> {
+    if (supabaseReady === false) return;
+
+    try {
+      const client = getSupabaseClient();
+      const { error } = await client.from("files").upsert(
+        {
+          content_key: record.key,
+          kind: record.kind,
+          file_name: record.fileName,
+          size_bytes: record.sizeBytes,
+          content_type: record.contentType,
+          status: record.status,
+          version: record.version,
+          sha256: record.sha256,
+          bucket: "r2",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "content_key" },
+      );
+
+      if (error) {
+        if (/does not exist|42P01|PGRST205|schema cache/i.test(error.message)) {
+          logger.warn(
+            "Table Supabase « files » absente — exécuter supabase/init.sql dans le SQL Editor.",
+          );
+          supabaseReady = false;
+        } else {
+          logger.warn("Écriture métadonnées Supabase échouée", {
+            message: error.message,
+          });
+        }
+        return;
+      }
+
+      supabaseReady = true;
+      logger.info("Métadonnées Supabase à jour", {
+        key: record.key,
+        version: record.version,
+      });
+    } catch (error) {
+      logger.warn("Supabase indisponible (métadonnées gardées en manifest)", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   private inferKind(fileName: string): FileKind {
