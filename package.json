@@ -14,14 +14,18 @@
     "demo:visual": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-visual.ts",
     "demo:video": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-video.ts",
     "demo:storage": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-storage.ts",
-    "demo:qc": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-qc.ts"
+    "demo:qc": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-qc.ts",
+    "whatsapp:connect": "node --env-file=.env.local --import tsx --no-warnings scripts/whatsapp-connect.ts",
+    "whatsapp:qr-test": "node --env-file=.env.local --import tsx --no-warnings scripts/whatsapp-qr-test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1124.0",
     "@supabase/supabase-js": "^2.113.0",
     "next": "16.3.4",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "whatsapp-web.js": "^1.34.7"
   },
   "devDependencies": {
     "@types/node": "^20",

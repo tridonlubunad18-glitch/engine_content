@@ -49,3 +49,6 @@ next-env.d.ts
 # sorties de génération locale (voix off, previews…) — jamais commitées
 /output/
 
+# session WhatsApp Web (whatsapp-web.js, LocalAuth) — jamais commitée
+/.wwebjs_auth/
+

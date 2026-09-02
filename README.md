@@ -68,6 +68,10 @@ npm run demo:storage
 
 # 11. Démo QC (Phase 7) — contrôle qualité FFprobe de la dernière vidéo
 npm run demo:qc
+
+# 12. WhatsApp (Phase 8) — génère un QR code et connecte votre téléphone (session longue)
+npm run whatsapp:connect
+# (Test rapide sans scan : npm run whatsapp:qr-test)
 ```
 
 ## Structure des modules (PRD §4)

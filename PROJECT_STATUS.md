@@ -7,9 +7,10 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 7 — QC
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (vidéo testée : score 100/100, PASS)
-**Prochaine phase :** PHASE 8 — WhatsApp (webhook, commandes, rapports, validation)
+**Phase courante :** PHASE 8 — WhatsApp (interface de contrôle humain)
+**Statut de la phase :** 🔧 EN COURS — connecteur whatsapp-web.js validé (QR généré) ;
+  vérification finale avec téléphone à faire (session + commandes)
+**Prochaine phase :** PHASE 9 — Publication (TikTok / Facebook) — après validation Phase 8
 
 ---
 
@@ -217,6 +218,30 @@
 
 ---
 
+## ✅ Checklist PHASE 8 — WhatsApp (PRD §37) — en cours
+
+- [x] **Choix d'intégration (décision utilisateur)** : `whatsapp-web.js` DIRECT, sans API Meta
+      payante ni intermédiaire (remplace la voie §3.10 — provider isolé/remplaçable)
+- [x] **provider WhatsApp** — `src/providers/whatsapp` : session LocalAuth (`.wwebjs_auth`, ignoré
+      par git), QR PNG (`output/whatsapp/qr.png`), navigateur Edge/Chrome auto-détecté,
+      CIRCUIT FERMÉ (seul `WHATSAPP_ALLOWED_NUMBER` déclenche des réponses)
+- [x] **génération du QR validée** — test réel : QR généré, session démarrée/arrêtée proprement
+- [x] **scripts** — `whatsapp:connect` (session longue + commandes « aide » / « rapport »),
+      `whatsapp:qr-test` (test one-shot)
+- [ ] **vérification téléphone** — scan du QR + échange réel (utilisateur) → session conservée
+- [ ] **commandes avancées** — validation vidéo, production, demandes personnalisées, rapports
+      quotidiens (Report Engine) — à brancher une fois la session validée
+- [x] dépendances installées : `whatsapp-web.js` + `qrcode` (postinstall puppeteer bloqué → Edge local)
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run whatsapp:qr-test` | ✅ QR généré `output/whatsapp/qr.png`, session arrêtée proprement |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -233,18 +258,20 @@ root/
   scripts/demo-video.ts  → démo Phase 5 (montage MP4 réel : scènes + voix + musique)
   scripts/demo-storage.ts → démo Phase 6 (upload voix + vidéo sur Cloudflare R2)
   scripts/demo-qc.ts     → démo Phase 7 (contrôle qualité FFprobe : score + verdict)
+  scripts/whatsapp-qr-test.ts → Phase 8 (test QR one-shot)
+  scripts/whatsapp-connect.ts → Phase 8 (session longue + commandes aide/rapport)
   src/
     app/                 → layout + page minimale (Phase 0)
     engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) +
                            template/visual (P4) + video (P5) + quality (P7) implémentés ; 4 squelettes
-    providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) + r2 fonctionnel (P6) ;
-                           supabase fonctionnel (P0, tables créées) ; whatsapp/tiktok/facebook squelettes
+    providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) + r2 fonctionnel (P6) +
+                           whatsapp-web direct (P8) ; supabase fonctionnel (P0) ; tiktok/facebook squelettes
     lib/                 → logger + ai + brand + storage (R2 + Supabase) fonctionnels ;
                            database/scheduler/metrics squelettes
   supabase/init.sql      → exécuté : tables files + content créées (2 lignes réelles dans files)
 ```
 
-Rappel des phases restantes (PRD §37) : 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
+Rappel des phases restantes (PRD §37) : 9 Publication → 10 Analytics → 11 Learning.
 
 ---
 
@@ -280,6 +307,8 @@ Rappel des phases restantes (PRD §37) : 8 WhatsApp → 9 Publication → 10 Ana
 | Jeton R2 recréé par l'utilisateur | le 1er jeton était en lecture seule (« Access Denied » à l'écriture) → recréation avec `Object Read & Write` |
 | Métadonnées Supabase branchées | `supabase/init.sql` exécuté par l'utilisateur ; `lib/storage` fait un upsert `files` (content_key) ; 2 lignes réelles |
 | QC déterministe FFprobe (score /100, PASS/WARN/FAIL) | PRD §3.6/§17 ; la démo vidéo passe à 100/100 |
+| WhatsApp DIRECT via `whatsapp-web.js` (remplace §3.10) | décision utilisateur : 0 €, personnel, circuit fermé (+243), anti-ban ~0 ; provider isolé, voie Meta conservée en option |
+| Session WhatsApp `LocalAuth` (`.wwebjs_auth`) | pas de rescan à chaque redémarrage ; dossier ignoré par git |
 
 ---
 
@@ -302,23 +331,19 @@ Rappel des phases restantes (PRD §37) : 8 WhatsApp → 9 Publication → 10 Ana
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 8 : WhatsApp
+## 🚦 SUITE PHASE 8 — WhatsApp : validation avec votre téléphone
 
-Définition (PRD §37 + §3.10/§24/§25) :
-- [ ] provider WhatsApp (API Business / Meta Cloud)
-- [ ] webhook (réception des messages)
-- [ ] commandes (Teste cette idée / Fais cette vidéo / Publie / Rapports…)
-- [ ] rapports (quotidien 21 h, hebdomadaire — Report Engine)
-- [ ] validation (approbation d'une vidéo prête)
-- [ ] demandes personnalisées
+1. Ouvrir `E:\Devs-APP\goal-content-machine\.env.local` → renseigner `WHATSAPP_ALLOWED_NUMBER`
+   (ex. `+243XXXXXXXXX`) — **votre** numéro uniquement (circuit fermé).
+2. Lancer dans un terminal : `npm run whatsapp:connect`.
+3. Au 1er lancement : ouvrir `output/whatsapp/qr.png` puis le scanner avec votre téléphone
+   (WhatsApp → Appareils connectés → Connecter un appareil).
+4. Envoyer « aide » ou « rapport » depuis VOTRE numéro → vérifier les réponses.
+5. La session est conservée (`.wwebjs_auth`) → plus de QR au redémarrage.
 
-**Prérequis identifiés (clés actuellement vides dans `.env.local`) :**
-1. Compte **Meta / WhatsApp Business** + numéro de test ou business :
-   `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`,
-   `WHATSAPP_WEBHOOK_VERIFY_TOKEN`.
-2. Le webhook devra être exposé (ngrok en dev, Vercel ensuite) → voir limites Vercel (§3.10).
-3. Les briques amont sont prêtes : contenu (P1), assets (P2), voix (P3), visuel (P4), vidéo (P5),
-   stockage R2+Supabase (P6), QC (P7).
+Ensuite : brancher les commandes avancées (validation vidéo, production, rapports quotidien/
+hebdomadaire — Report Engine), puis passer à la **Phase 9 — Publication** (TikTok/Facebook :
+clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
 
 ---
 
@@ -361,3 +386,6 @@ Définition (PRD §37 + §3.10/§24/§25) :
 - **Phase 7 — QC** : Quality Engine FFprobe (score /100, PASS/WARN/FAIL), suggestions de correction,
   validation READY_FOR_APPROVAL. Démo `npm run demo:qc` vérifiée : **100/100 PASS** sur la vidéo P5.
   Commit `9e7a326`.
+- **Phase 8 — WhatsApp (connecteur)** : décision utilisateur (whatsapp-web.js direct, 0 €),
+  provider LocalAuth + QR + circuit fermé, scripts connect/qr-test. QR réel généré.
+  Commit : à noter après push. (Vérification téléphone en attente utilisateur.)
