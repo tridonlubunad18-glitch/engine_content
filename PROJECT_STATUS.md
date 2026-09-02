@@ -7,9 +7,9 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 6 — Storage
-**Statut de la phase :** ✅ TERMINÉE et vérifiée (voix + vidéo uploadées sur Cloudflare R2)
-**Prochaine phase :** PHASE 7 — QC (contrôle automatique, score qualité, correction, validation)
+**Phase courante :** PHASE 7 — QC
+**Statut de la phase :** ✅ TERMINÉE et vérifiée (vidéo testée : score 100/100, PASS)
+**Prochaine phase :** PHASE 8 — WhatsApp (webhook, commandes, rapports, validation)
 
 ---
 
@@ -199,6 +199,24 @@
 
 ---
 
+## ✅ Checklist PHASE 7 — QC (PRD §37)
+
+- [x] **Quality Engine** — `src/engines/quality-engine` : `inspect()` via FFprobe (déterministe, PRD §3.6)
+- [x] **contrôles automatiques (PRD §17)** — vertical 9:16, ratio, durée 30-60 s, piste audio, taille
+- [x] **score qualité /100** + verdict **PASS / WARN / FAIL** (seuils 85 / 60)
+- [x] **correction** — suggestions automatiques vers le Video Engine (FAIL → CORRECTION → QC, PRD §17)
+- [x] **validation** — PASS = statut prêt pour validation humaine (READY_FOR_APPROVAL, PRD §15)
+- [x] **Outil de test** — `scripts/demo-qc.ts` + `npm run demo:qc`
+
+### Vérifications effectuées (02/09/2026)
+
+| Vérification | Résultat |
+|---|---|
+| `npm run demo:qc` (vidéo réelle P5) | ✅ **Score 100/100 — PASS** (1080×1920 · ratio 0,563 · 35,0 s · audio présente · 5,1 Mo) |
+| `npm run typecheck` / `lint` / `build` | ✅ OK |
+
+---
+
 ## 🧭 État du code
 
 ```text
@@ -214,19 +232,19 @@ root/
   scripts/demo-visual.ts → démo Phase 4 (plan visuel : script + assets réels → plan de montage)
   scripts/demo-video.ts  → démo Phase 5 (montage MP4 réel : scènes + voix + musique)
   scripts/demo-storage.ts → démo Phase 6 (upload voix + vidéo sur Cloudflare R2)
+  scripts/demo-qc.ts     → démo Phase 7 (contrôle qualité FFprobe : score + verdict)
   src/
     app/                 → layout + page minimale (Phase 0)
     engines/             → strategy/angle/hook/script (P1) + asset (P2) + voice (P3) +
-                           template/visual (P4) + video (P5) implémentés ; 5 moteurs en squelettes
+                           template/visual (P4) + video (P5) + quality (P7) implémentés ; 4 squelettes
     providers/           → deepseek (P1) + elevenlabs multi-comptes (P3) + r2 fonctionnel (P6) ;
-                           supabase fonctionnel (P0) ; whatsapp/tiktok/facebook squelettes
-    lib/                 → logger + ai + brand + storage (R2 + manifest) fonctionnels ;
+                           supabase fonctionnel (P0, tables créées) ; whatsapp/tiktok/facebook squelettes
+    lib/                 → logger + ai + brand + storage (R2 + Supabase) fonctionnels ;
                            database/scheduler/metrics squelettes
-  supabase/init.sql      → schéma SQL prêt à exécuter (tables files + content, PRD §29)
+  supabase/init.sql      → exécuté : tables files + content créées (2 lignes réelles dans files)
 ```
 
-Rappel des phases restantes (PRD §37) : 7 QC → 8 WhatsApp → 9 Publication →
-10 Analytics → 11 Learning.
+Rappel des phases restantes (PRD §37) : 8 WhatsApp → 9 Publication → 10 Analytics → 11 Learning.
 
 ---
 
@@ -260,6 +278,8 @@ Rappel des phases restantes (PRD §37) : 7 QC → 8 WhatsApp → 9 Publication �
 | Video Engine v1 (segments + concat + mixage) | PRD §13 ; rendu local (Vercel/worker envisagés plus tard, PRD §3.8) |
 | Upload Cloudflare R2 réel (bucket `marketing243`) | `lib/storage` avec forcePathStyle + endpoint déduit de l'Account ID (bug `??` vs `||` corrigé) ; métadonnées manifest local + `supabase/init.sql` prêt |
 | Jeton R2 recréé par l'utilisateur | le 1er jeton était en lecture seule (« Access Denied » à l'écriture) → recréation avec `Object Read & Write` |
+| Métadonnées Supabase branchées | `supabase/init.sql` exécuté par l'utilisateur ; `lib/storage` fait un upsert `files` (content_key) ; 2 lignes réelles |
+| QC déterministe FFprobe (score /100, PASS/WARN/FAIL) | PRD §3.6/§17 ; la démo vidéo passe à 100/100 |
 
 ---
 
@@ -282,21 +302,23 @@ Rappel des phases restantes (PRD §37) : 7 QC → 8 WhatsApp → 9 Publication �
 
 ---
 
-## 🚦 PROCHAINE SESSION — PHASE 7 : QC
+## 🚦 PROCHAINE SESSION — PHASE 8 : WhatsApp
 
-Définition (PRD §37) :
-- [ ] contrôle automatique (PRD §17 : vertical, durée 30-60 s, voix claire, sous-titres présents,
-      CTA présent, aucun asset incorrect…)
-- [ ] score qualité (ex. /100)
-- [ ] correction (retour vers Video Engine si échec)
-- [ ] validation (statut READY_FOR_APPROVAL, PRD §15)
+Définition (PRD §37 + §3.10/§24/§25) :
+- [ ] provider WhatsApp (API Business / Meta Cloud)
+- [ ] webhook (réception des messages)
+- [ ] commandes (Teste cette idée / Fais cette vidéo / Publie / Rapports…)
+- [ ] rapports (quotidien 21 h, hebdomadaire — Report Engine)
+- [ ] validation (approbation d'une vidéo prête)
+- [ ] demandes personnalisées
 
-**Prérequis / remarques :**
-- Outils déjà en place : FFprobe (durée/résolution réelles), assets, fichiers sur R2, plan visuel P4.
-- Le QC reste en code déterministe (PRD §3.6) : vérifications FFprobe + règles ; pas d'IA pour les
-  mesures (une analyse visuelle IA pourra venir plus tard si nécessaire).
-- Point utilisateur en attente : exécuter `supabase/init.sql` (SQL Editor Supabase) pour brancher
-  les métadonnées Supabase (suivi Phase 6).
+**Prérequis identifiés (clés actuellement vides dans `.env.local`) :**
+1. Compte **Meta / WhatsApp Business** + numéro de test ou business :
+   `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`,
+   `WHATSAPP_WEBHOOK_VERIFY_TOKEN`.
+2. Le webhook devra être exposé (ngrok en dev, Vercel ensuite) → voir limites Vercel (§3.10).
+3. Les briques amont sont prêtes : contenu (P1), assets (P2), voix (P3), visuel (P4), vidéo (P5),
+   stockage R2+Supabase (P6), QC (P7).
 
 ---
 
@@ -334,3 +356,8 @@ Définition (PRD §37) :
   Write`), `lib/storage` (upload réel + checksum + versioning + statuts en manifest), `supabase/init.sql`
   prêt. Démo `npm run demo:storage` vérifiée (voix v3 + vidéo v1 PRÉSENTES sur R2, bucket `marketing243`).
   Commit `cf57841`.
+- **Branchement Supabase** : `supabase/init.sql` exécuté par l'utilisateur ; upsert `files` branché
+  dans `lib/storage` (2 lignes réelles). Commit `ef97949`.
+- **Phase 7 — QC** : Quality Engine FFprobe (score /100, PASS/WARN/FAIL), suggestions de correction,
+  validation READY_FOR_APPROVAL. Démo `npm run demo:qc` vérifiée : **100/100 PASS** sur la vidéo P5.
+  Commit : à noter après push.

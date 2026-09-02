@@ -13,7 +13,8 @@
     "demo:voice": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-voice.ts",
     "demo:visual": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-visual.ts",
     "demo:video": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-video.ts",
-    "demo:storage": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-storage.ts"
+    "demo:storage": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-storage.ts",
+    "demo:qc": "node --env-file=.env.local --import tsx --no-warnings scripts/demo-qc.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1124.0",

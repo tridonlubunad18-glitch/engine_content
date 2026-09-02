@@ -65,6 +65,9 @@ npm run demo:video
 
 # 10. Démo Storage (Phase 6) — upload voix + vidéo sur Cloudflare R2 (nécessite les clés R2)
 npm run demo:storage
+
+# 11. Démo QC (Phase 7) — contrôle qualité FFprobe de la dernière vidéo
+npm run demo:qc
 ```
 
 ## Structure des modules (PRD §4)
