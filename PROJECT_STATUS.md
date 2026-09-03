@@ -399,5 +399,5 @@ Ensuite : rapports quotidiens (Report Engine), validation vidéo, puis **Phase 9
 - **Phase 8 — enrichissements** : QR en texte (logs Render), reconnexion auto si session perdue,
   cerveau IA sur messages naturels (`lib/whatsapp-brain`, DeepSeek). Commit `be8f835`.
 - **Bascule Gmail (décision utilisateur)** : le canal de contrôle humain passe à Gmail (SMTP/IMAP,
-  circuit fermé, WhatsApp conservé en option) — `providers/email` + `email:connect`. Commit à noter
-  après push. (Test réel en attente du mot de passe d'application Gmail.)
+  circuit fermé, WhatsApp conservé en option) — `providers/email` + `email:connect`. Commit `0493587`.
+  (Test réel en attente du mot de passe d'application Gmail.)
