@@ -395,4 +395,4 @@ Ensuite : brancher la validation vidéo (approbation), les rapports quotidiens (
   provider LocalAuth + QR + circuit fermé, scripts connect/qr-test. QR réel généré.
   Commit `cc79f06`. (Vérification téléphone en attente utilisateur.)
 - **Phase 8 — enrichissements** : QR en texte (logs Render), reconnexion auto si session perdue,
-  cerveau IA sur messages naturels (`lib/whatsapp-brain`, DeepSeek). Commit à noter après push.
+  cerveau IA sur messages naturels (`lib/whatsapp-brain`, DeepSeek). Commit `be8f835`.
