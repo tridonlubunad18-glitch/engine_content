@@ -65,6 +65,8 @@ export class WhatsAppProvider {
 
   private readonly authPath: string;
   private readonly executablePath: string | null;
+  private reconnectTimer: NodeJS.Timeout | null = null;
+  private reconnectAttempts = 0;
 
   constructor() {
     this.authPath =
@@ -104,20 +106,26 @@ export class WhatsAppProvider {
     this.client = client;
 
     client.on("qr", (qr) => {
+      this.reconnectAttempts = 0;
       void this.handleQr(qr);
     });
     client.on("ready", () => {
+      this.reconnectAttempts = 0;
       logger.info("WhatsApp : session prête (authentifié)");
     });
     client.on("authenticated", () => {
+      this.reconnectAttempts = 0;
       logger.info("WhatsApp : authentifié (session conservée dans .wwebjs_auth)");
     });
     client.on("auth_failure", (message) => {
-      logger.error("WhatsApp : échec d'authentification", { message });
+      logger.error("WhatsApp : échec d'authentification — nouveau QR nécessaire", {
+        message,
+      });
+      void this.handleSessionLost("auth_failure");
     });
     client.on("disconnected", (reason) => {
       logger.warn("WhatsApp : déconnecté", { reason });
-      this.client = null;
+      void this.handleSessionLost(reason);
     });
     client.on("message", (message) => {
       void this.handleIncoming(message);
@@ -150,6 +158,10 @@ export class WhatsAppProvider {
 
   /** Arrête proprement la session. */
   async stop(): Promise<void> {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (this.client) {
       await this.client.destroy().catch(() => undefined);
       this.client = null;
@@ -157,19 +169,59 @@ export class WhatsAppProvider {
     }
   }
 
-  /** Écrit le QR code en PNG (output/whatsapp/qr.png) et le signale. */
+  /**
+   * Session perdue (redéploiement Render, déconnexion…) : détruit
+   * l'ancien client puis relance une session (nouveau QR) sans crasher.
+   */
+  private async handleSessionLost(reason: string): Promise<void> {
+    if (this.reconnectTimer) return; // une reconnexion est déjà planifiée
+    const previous = this.client;
+    this.client = null;
+    await previous?.destroy().catch(() => undefined);
+
+    const delayMs = Math.min(2_000 * 2 ** this.reconnectAttempts, 30_000);
+    this.reconnectAttempts += 1;
+    logger.warn("WhatsApp : reconnexion automatique planifiée", {
+      reason,
+      delayMs,
+      attempts: this.reconnectAttempts,
+    });
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      void this.start().catch((error) => {
+        logger.error("WhatsApp : échec de reconnexion", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+    }, delayMs);
+  }
+
+  /** Écrit le QR code en PNG ET en texte (logs Render) pour le scanner. */
   private async handleQr(qr: string): Promise<void> {
+    // 1) QR en texte/terminal → visible dans les logs Render
+    try {
+      const ascii = await QRCode.toString(qr, { type: "terminal", small: true });
+      console.log("\n════════════════════════════════════════");
+      console.log("📲 SCANNEZ CE QR CODE (WhatsApp → Appareils connectés)");
+      console.log("════════════════════════════════════════");
+      console.log(ascii);
+      console.log("════════════════════════════════════════\n");
+    } catch (error) {
+      logger.error("WhatsApp : impossible de générer le QR texte", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // 2) Copie PNG locale (pratique en dev)
     try {
       const dir = path.resolve(process.cwd(), "output", "whatsapp");
       await fs.mkdir(dir, { recursive: true });
       const filePath = path.join(dir, "qr.png");
       await QRCode.toFile(filePath, qr, { width: 360 });
-      logger.warn(
-        "WhatsApp : scannez le QR code avec votre téléphone (WhatsApp → Appareils connectés → Connecter un appareil)",
-        { filePath },
-      );
+      logger.warn("WhatsApp : QR code aussi écrit en PNG", { filePath });
     } catch (error) {
-      logger.error("WhatsApp : impossible d'écrire le QR code", {
+      logger.error("WhatsApp : impossible d'écrire le QR PNG", {
         error: error instanceof Error ? error.message : String(error),
       });
     }

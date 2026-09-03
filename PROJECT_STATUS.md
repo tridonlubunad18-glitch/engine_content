@@ -309,6 +309,7 @@ Rappel des phases restantes (PRD §37) : 9 Publication → 10 Analytics → 11 L
 | QC déterministe FFprobe (score /100, PASS/WARN/FAIL) | PRD §3.6/§17 ; la démo vidéo passe à 100/100 |
 | WhatsApp DIRECT via `whatsapp-web.js` (remplace §3.10) | décision utilisateur : 0 €, personnel, circuit fermé (+243), anti-ban ~0 ; provider isolé, voie Meta conservée en option |
 | Session WhatsApp `LocalAuth` (`.wwebjs_auth`) | pas de rescan à chaque redémarrage ; dossier ignoré par git |
+| QR texte + reconnexion auto + cerveau IA | pensé Render : QR visible dans les logs, session perdue → nouveau QR sans crash ; messages naturels → DeepSeek |
 
 ---
 
@@ -333,17 +334,21 @@ Rappel des phases restantes (PRD §37) : 9 Publication → 10 Analytics → 11 L
 
 ## 🚦 SUITE PHASE 8 — WhatsApp : validation avec votre téléphone
 
+✅ Déjà en place : **QR en texte dans les logs** (idéal Render), **reconnexion auto** si la session
+saute (`.wwebjs_auth` perdu au redéploiement), **cerveau IA** (messages naturels → DeepSeek pour
+ajuster la stratégie), circuit fermé (+243).
+
 1. Ouvrir `E:\Devs-APP\goal-content-machine\.env.local` → renseigner `WHATSAPP_ALLOWED_NUMBER`
    (ex. `+243XXXXXXXXX`) — **votre** numéro uniquement (circuit fermé).
 2. Lancer dans un terminal : `npm run whatsapp:connect`.
-3. Au 1er lancement : ouvrir `output/whatsapp/qr.png` puis le scanner avec votre téléphone
-   (WhatsApp → Appareils connectés → Connecter un appareil).
-4. Envoyer « aide » ou « rapport » depuis VOTRE numéro → vérifier les réponses.
-5. La session est conservée (`.wwebjs_auth`) → plus de QR au redémarrage.
+3. Au 1er lancement : **scanner le QR affiché dans le terminal/logs** (WhatsApp → Appareils connectés).
+4. Envoyer « aide », « rapport » ou un **message naturel** (ex. « teste cette idée : les parieurs
+   composent des coupons trop chargés ») → la machine répond via l'IA.
+5. Session conservée (`.wwebjs_auth`) ; sur Render, si la session saute après un déploiement,
+   un nouveau QR s'affiche automatiquement.
 
-Ensuite : brancher les commandes avancées (validation vidéo, production, rapports quotidien/
-hebdomadaire — Report Engine), puis passer à la **Phase 9 — Publication** (TikTok/Facebook :
-clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
+Ensuite : brancher la validation vidéo (approbation), les rapports quotidiens (Report Engine), puis
+**Phase 9 — Publication** (clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
 
 ---
 
@@ -389,3 +394,5 @@ clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
 - **Phase 8 — WhatsApp (connecteur)** : décision utilisateur (whatsapp-web.js direct, 0 €),
   provider LocalAuth + QR + circuit fermé, scripts connect/qr-test. QR réel généré.
   Commit `cc79f06`. (Vérification téléphone en attente utilisateur.)
+- **Phase 8 — enrichissements** : QR en texte (logs Render), reconnexion auto si session perdue,
+  cerveau IA sur messages naturels (`lib/whatsapp-brain`, DeepSeek). Commit à noter après push.

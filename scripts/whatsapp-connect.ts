@@ -13,6 +13,7 @@
 
 import { whatsappProvider } from "../src/providers/whatsapp";
 import { storageService } from "../src/lib/storage";
+import { answerWithBrain } from "../src/lib/whatsapp-brain";
 
 const HELP_TEXT = [
   "🤖 Goal-IA Content Engine",
@@ -62,10 +63,16 @@ async function main(): Promise<void> {
       await whatsappProvider.sendMessage(message.from, report);
       return;
     }
-    await whatsappProvider.sendMessage(
-      message.from,
-      `Message reçu (« ${body.slice(0, 60)} »). Tape « aide » pour les commandes.`,
-    );
+    if (/(valide|publie)/.test(body)) {
+      await whatsappProvider.sendMessage(
+        message.from,
+        "🚧 Validation/publication : bientôt disponible (Phase 9). En attendant, écrivez votre idée ou votre question : je l'analyse avec l'IA.",
+      );
+      return;
+    }
+    // Message naturel → cerveau IA (stratégie marketing Goal-IA)
+    const reply = await answerWithBrain(message.body);
+    await whatsappProvider.sendMessage(message.from, reply);
   });
 
   await whatsappProvider.start();
