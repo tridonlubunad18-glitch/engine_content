@@ -7,10 +7,10 @@
 
 **PRD :** v2.0 — 01/09/2026
 **Dernière mise à jour :** 02/09/2026
-**Phase courante :** PHASE 8 — WhatsApp (interface de contrôle humain)
-**Statut de la phase :** 🔧 EN COURS — connecteur whatsapp-web.js validé (QR généré) ;
-  vérification finale avec téléphone à faire (session + commandes)
-**Prochaine phase :** PHASE 9 — Publication (TikTok / Facebook) — après validation Phase 8
+**Phase courante :** PHASE 8 — Canal de contrôle humain (Gmail — décision utilisateur)
+**Statut de la phase :** 🔧 EN COURS — provider Gmail (SMTP/IMAP) implémenté et typé ;
+  test réel en attente des identifiants Gmail de l&apos;utilisateur
+**Prochaine phase :** PHASE 9 — Publication (TikTok / Facebook)
 
 ---
 
@@ -310,6 +310,7 @@ Rappel des phases restantes (PRD §37) : 9 Publication → 10 Analytics → 11 L
 | WhatsApp DIRECT via `whatsapp-web.js` (remplace §3.10) | décision utilisateur : 0 €, personnel, circuit fermé (+243), anti-ban ~0 ; provider isolé, voie Meta conservée en option |
 | Session WhatsApp `LocalAuth` (`.wwebjs_auth`) | pas de rescan à chaque redémarrage ; dossier ignoré par git |
 | QR texte + reconnexion auto + cerveau IA | pensé Render : QR visible dans les logs, session perdue → nouveau QR sans crash ; messages naturels → DeepSeek |
+| CANAL Gmail (remplace WhatsApp, décision utilisateur) | plus simple (pas de QR/session) : SMTP envoi + IMAP lecture, circuit fermé = seule l'adresse Gmail_USER ; WhatsApp conservé en option |
 
 ---
 
@@ -332,23 +333,24 @@ Rappel des phases restantes (PRD §37) : 9 Publication → 10 Analytics → 11 L
 
 ---
 
-## 🚦 SUITE PHASE 8 — WhatsApp : validation avec votre téléphone
+## 🚦 SUITE PHASE 8 — Gmail : validation réelle
 
-✅ Déjà en place : **QR en texte dans les logs** (idéal Render), **reconnexion auto** si la session
-saute (`.wwebjs_auth` perdu au redéploiement), **cerveau IA** (messages naturels → DeepSeek pour
-ajuster la stratégie), circuit fermé (+243).
+✅ En place : provider Gmail (SMTP envoi + IMAP lecture, circuit fermé = seule votre adresse),
+   boucle `email:connect` (aide / rapport / messages naturels → IA), WhatsApp conservé en option.
 
-1. Ouvrir `E:\Devs-APP\goal-content-machine\.env.local` → renseigner `WHATSAPP_ALLOWED_NUMBER`
-   (ex. `+243XXXXXXXXX`) — **votre** numéro uniquement (circuit fermé).
-2. Lancer dans un terminal : `npm run whatsapp:connect`.
-3. Au 1er lancement : **scanner le QR affiché dans le terminal/logs** (WhatsApp → Appareils connectés).
-4. Envoyer « aide », « rapport » ou un **message naturel** (ex. « teste cette idée : les parieurs
-   composent des coupons trop chargés ») → la machine répond via l'IA.
-5. Session conservée (`.wwebjs_auth`) ; sur Render, si la session saute après un déploiement,
-   un nouveau QR s'affiche automatiquement.
+1. **Créer un mot de passe d&apos;application Gmail** (voir README) :
+   Compte Google → Sécurité → **Validation en 2 étapes** (activer) → **Mots de passe
+   d&apos;application** → générer (16 caractères, ex. `abcd efgh ijkl mnop`).
+2. Dans `E:\Devs-APP\goal-content-machine\.env.local` :
+   ```env
+   GMAIL_USER=votreadresse@gmail.com
+   GMAIL_APP_PASSWORD=abcd efgh ijkl mnop
+   ```
+3. Lancer : `npm run email:connect` → un email de démarrage est envoyé à votre adresse.
+4. Répondre à cet email (ou en envoyer un neuf à votre adresse) : « aide », « rapport »
+   ou une idée naturelle → la machine répond via l&apos;IA.
 
-Ensuite : brancher la validation vidéo (approbation), les rapports quotidiens (Report Engine), puis
-**Phase 9 — Publication** (clés `TIKTOK_*`/`FACEBOOK_*` encore vides).
+Ensuite : rapports quotidiens (Report Engine), validation vidéo, puis **Phase 9 — Publication**.
 
 ---
 
@@ -396,3 +398,6 @@ Ensuite : brancher la validation vidéo (approbation), les rapports quotidiens (
   Commit `cc79f06`. (Vérification téléphone en attente utilisateur.)
 - **Phase 8 — enrichissements** : QR en texte (logs Render), reconnexion auto si session perdue,
   cerveau IA sur messages naturels (`lib/whatsapp-brain`, DeepSeek). Commit `be8f835`.
+- **Bascule Gmail (décision utilisateur)** : le canal de contrôle humain passe à Gmail (SMTP/IMAP,
+  circuit fermé, WhatsApp conservé en option) — `providers/email` + `email:connect`. Commit à noter
+  après push. (Test réel en attente du mot de passe d'application Gmail.)

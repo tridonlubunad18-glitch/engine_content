@@ -98,9 +98,13 @@ export class WhatsAppProvider {
     const client = new Client({
       authStrategy: new LocalAuth({ dataPath: this.authPath }),
       puppeteer: {
-        headless: true,
+        headless: process.env.WHATSAPP_HEADLESS?.toLowerCase() !== "false",
         executablePath: this.executablePath,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-blink-features=AutomationControlled",
+        ],
       },
     });
     this.client = client;
